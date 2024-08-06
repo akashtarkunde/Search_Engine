@@ -1,0 +1,76 @@
+<!doctype html>
+<html lang="en">
+<head>
+    <title>Search Products</title>
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
+    <style>
+        table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+        table, th, td {
+            border: 1px solid black;
+        }
+        th, td {
+            padding: 10px;
+            text-align: left;
+        }
+    </style>
+</head>
+<body>
+    <h1>Search Products</h1>
+    <input type="text" id="search-bar" placeholder="Search for products...">
+    <button onclick="search()">Search</button>
+    <table id="results-table">
+        <thead>
+            <tr>
+                <th>Product Name</th>
+                <th>Brand Name</th>
+                <th>Brand Description</th>
+                <th>Product Size</th>
+                <th>Currency</th>
+                <th>MRP</th>
+                <th>Sell Price</th>
+                <th>Discount</th>
+                <th>Category</th>
+            </tr>
+        </thead>
+        <tbody>
+        </tbody>
+    </table>
+    <script>
+        function search() {
+            var query = document.getElementById('search-bar').value;
+            $.ajax({
+                url: '/search-products/?q=' + encodeURIComponent(query),  // Correct URL pattern
+                method: 'GET',
+                success: function(data) {
+                    console.log('Data received:', data);  // Debugging log
+                    var tableBody = $('#results-table tbody');
+                    tableBody.empty();
+                    if (data.length === 0) {
+                        tableBody.append('<tr><td colspan="7">No results found</td></tr>');
+                    } else {
+                        data.forEach(function(product) {
+                            tableBody.append('<tr>' +
+                                '<td>' + (product.ProductName || '') + '</td>' +
+                                '<td>' + (product.BrandName || '') + '</td>' +
+                                '<td>' + (product.BrandDesc || '') + '</td>' +
+                                '<td>' + (product.ProductSize || '') + '</td>' +
+                                '<td>' + (product.Currency || '') + '</td>' +
+                                '<td>' + (product.MRP || '') + '</td>' +
+                                '<td>' + (product.SellPrice || '') + '</td>' +
+                                '<td>' + (product.Discount || '') + '</td>' +
+                                '<td>' + (product.Category || '') + '</td>' +
+                            '</tr>');
+                        });
+                    }
+                },
+                error: function(xhr, status, error) {
+                    console.error('AJAX Error:', status, error);
+                }
+            });
+        }
+    </script>
+</body>
+</html>
