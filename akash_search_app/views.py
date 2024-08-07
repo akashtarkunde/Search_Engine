@@ -5,8 +5,22 @@ from .models import Product
 from django.db.models import Q
 from .serializers import ProductSerializer
 from rest_framework.response import Response
+from fastapi import FastAPI, HTTPException
+import requests
+from django.views.decorators.csrf import csrf_exempt
 
+@api_view(['POST'])
+def upload_products(request):
+    # This view can send data to FastAPI
+    products = request.data
+    print(products)
+    fastapi_url = "http://localhost:8002/upload-products/"  # Adjust port if needed
+    response = requests.post(fastapi_url, json=products)
 
+    if response.status_code == 200:
+        return Response(response.json())
+    else:
+        return Response({"error": response.text}, status=response.status_code)
 @api_view(['GET'])
 def search_products(request):
     query = request.GET.get('q', '')
@@ -49,46 +63,23 @@ def search_products(request):
 
     # Debugging logs
     #print(f"Raw Results: {[{'ProductName': p.ProductName, 'MRP': p.MRP, 'SellPrice': p.SellPrice} for p in products]}")
-    print(f"Serialized Results: {serializer.data}")
+    #print(f"Serialized Results: {serializer.data}")
 
-    return Response(serializer.data)
+    #return Response(serializer.data)
 
-def search_page(request):
-    query = request.GET.get('q', '')
-    if query:
-        products = Product.objects.filter(ProductName__icontains=query)
+    # Send results to FastAPI
+    fastapi_url = "http://localhost:8002/upload-products/"
+    print("sending to fast api")
+    response = requests.post(fastapi_url, json=serializer.data)
+
+    # Handle FastAPI response
+    if response.status_code == 200:
+        print("Response received from FastAPI")
+        print("FastAPI Response:", response.json())
+        return Response(serializer.data)
     else:
-        products = Product.objects.all()
-
-    context = {
-        'products': products,
-    }
-    return render(request, 'akash_search_app/search.html', context)
-
-
-    results = []
-    for product in products:
-        result = {
-            'ProductName': product.ProductName,
-            'BrandName': product.BrandName,
-            'BrandDesc': product.BrandDesc,
-            'ProductSize': product.ProductSize,
-            'Currency': product.Currency,
-            'MRP': product.MRP,
-            'SellPrice': product.SellPrice,
-            'Discount': product.Discount,
-            'Category': product.Category,
-        }
-        results.append(result)
-
-    serializer = ProductSerializer(products, many=True)
-    # Print out raw data before serialization for debugging
-    print(f"Raw Results: {[{'ProductName': p.ProductName, 'MRP': p.MRP, 'SellPrice': p.SellPrice} for p in products]}")
-
-    print(f"Serialized Results: {serializer.data}")  # Debugging log
-
-    return Response(serializer.data)
-
+        print("response failed")
+        return Response({"error": response.text}, status=response.status_code)
 
 def search_page(request):
     query = request.GET.get('q', '')
