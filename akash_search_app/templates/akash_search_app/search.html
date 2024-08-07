@@ -20,6 +20,11 @@
 <body>
     <h1>Search Products</h1>
     <input type="text" id="search-bar" placeholder="Search for products...">
+    <input type="text" id="brand-filter" placeholder="Filter by brand...">
+    <input type="text" id="size-filter" placeholder="Filter by size...">
+    <input type="text" id="category-filter" placeholder="Filter by category...">
+    <input type="number" id="min-price-filter" placeholder="Min price...">
+    <input type="number" id="max-price-filter" placeholder="Max price...">
     <button onclick="search()">Search</button>
     <table id="results-table">
         <thead>
@@ -41,15 +46,29 @@
     <script>
         function search() {
             var query = document.getElementById('search-bar').value;
+            var brand = document.getElementById('brand-filter').value;
+            var size = document.getElementById('size-filter').value;
+            var category = document.getElementById('category-filter').value;
+            var minPrice = document.getElementById('min-price-filter').value;
+            var maxPrice = document.getElementById('max-price-filter').value;
+
             $.ajax({
-                url: '/search-products/?q=' + encodeURIComponent(query),  // Correct URL pattern
+                url: '/search-products/',
                 method: 'GET',
+                data: {
+                    q: query,
+                    brand: brand,
+                    size: size,
+                    category: category,
+                    min_price: minPrice,
+                    max_price: maxPrice
+                },
                 success: function(data) {
                     console.log('Data received:', data);  // Debugging log
                     var tableBody = $('#results-table tbody');
                     tableBody.empty();
                     if (data.length === 0) {
-                        tableBody.append('<tr><td colspan="7">No results found</td></tr>');
+                        tableBody.append('<tr><td colspan="9">No results found</td></tr>');
                     } else {
                         data.forEach(function(product) {
                             tableBody.append('<tr>' +

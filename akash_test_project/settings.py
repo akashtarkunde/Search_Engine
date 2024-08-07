@@ -39,6 +39,7 @@ INSTALLED_APPS = [
     "django.contrib.staticfiles",
     "akash_search_app",
     "rest_framework",
+    'django_elasticsearch_dsl',
 ]
 
 MIDDLEWARE = [
@@ -68,6 +69,13 @@ TEMPLATES = [
         },
     },
 ]
+
+ELASTICSEARCH_DSL = {
+    'default': {
+        'hosts': 'http://localhost:9200',
+    },
+}
+
 
 WSGI_APPLICATION = "akash_test_project.wsgi.application"
 
